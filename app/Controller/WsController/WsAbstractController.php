@@ -38,6 +38,7 @@ abstract class WsAbstractController implements OnMessageInterface, OnOpenInterfa
      * @var ContainerInterface
      */
     protected $container;
+
     /**
      * @param WebSocketServer $server
      * @param Request $request

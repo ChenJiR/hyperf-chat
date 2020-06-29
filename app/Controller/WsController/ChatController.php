@@ -81,7 +81,10 @@ class ChatController extends WsAbstractController
         echo "client {$fd} closed\n";
     }
 
-    public function onTesk(){
+
+    public function login()
+    {
 
     }
+
 }
