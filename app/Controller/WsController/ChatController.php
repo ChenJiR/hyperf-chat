@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\Controller\WsController;
 
+use App\Service\ChatMessageService;
+use App\Service\ChatRoomsService;
+use App\Service\UserService;
+use Hyperf\Di\Annotation\Inject;
 use Swoole\Http\Request;
 use Swoole\Server;
 use Swoole\Websocket\Frame;
@@ -10,6 +14,24 @@ use Swoole\WebSocket\Server as WebSocketServer;
 
 class ChatController extends WsAbstractController
 {
+
+    /**
+     * @Inject()
+     * @var UserService
+     */
+    private $userService;
+
+    /**
+     * @Inject()
+     * @var ChatRoomsService
+     */
+    private $chatRoomsService;
+
+    /**
+     * @Inject()
+     * @var ChatMessageService
+     */
+    private $chatMessageService;
 
     /**
      * @param WebSocketServer $server
@@ -20,6 +42,7 @@ class ChatController extends WsAbstractController
         $data = json_decode($frame->data, true);
         switch ($data['type']) {
             case 1://登录
+//                $this->userService->login();
                 $data = [
                     'task' => 'login',
                     'params' => ['name' => $data['name'], 'email' => $data['email']],
@@ -82,9 +105,6 @@ class ChatController extends WsAbstractController
     }
 
 
-    public function login()
-    {
 
-    }
 
 }
