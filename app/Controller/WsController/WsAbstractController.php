@@ -38,4 +38,13 @@ abstract class WsAbstractController implements OnMessageInterface, OnOpenInterfa
      * @var ContainerInterface
      */
     protected $container;
+    /**
+     * @param WebSocketServer $server
+     * @param Request $request
+     */
+    public function onOpen($server, Request $request): void
+    {
+        $server->task(json_encode(['task' => 'open', 'fd' => $request->fd]));
+        echo "open\n";
+    }
 }

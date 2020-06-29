@@ -15,6 +15,9 @@ use App\Constants\StatusCode;
 use App\Exception\BusinessException;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\RequestMapping;
+use Hyperf\HttpServer\Annotation\AutoController;
+use Hyperf\View\RenderInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class IndexController
@@ -24,14 +27,13 @@ use Hyperf\HttpServer\Annotation\RequestMapping;
 class IndexController extends HttpAbstractController
 {
     /**
-     * @RequestMapping(path="/",method="get,post")
+     * @RequestMapping(path="/",method="get")
+     * @param RenderInterface $render
+     * @return ResponseInterface
      */
-    public function index()
+    public function index(RenderInterface $render)
     {
-        return $this->success([
-            'method' => $this->request->getMethod(),
-            'result' => 'asd'
-        ], 's');
+        return $render->render('index');
     }
 
     /**
