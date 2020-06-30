@@ -42,12 +42,14 @@ class ChatRoomsService
 
     /**
      * 切换房间
-     * @param RoomOnlineUser $room_user
+     * @param $fd
      * @param $room_id
      * @return bool
      */
-    public function checkRooms(RoomOnlineUser $room_user, $room_id)
+    public function checkRooms($fd, $room_id)
     {
+        /** @var RoomOnlineUser $room_user */
+        $room_user = RoomOnlineUser::query()->where(['fd' => $fd])->first();
         $room_user->room_id = $room_id;
         return $room_user->save();
     }

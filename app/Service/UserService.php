@@ -5,6 +5,7 @@ namespace App\Service;
 
 use App\Constants\StatusCode;
 use App\Exception\BusinessException;
+use App\Model\RoomOnlineUser;
 use App\Model\User;
 use Hyperf\Di\Annotation\Inject;
 
@@ -44,10 +45,12 @@ class UserService
 
     /**
      * 登出
+     * @param int $fd
+     * @return int|mixed
      */
-    public function logout()
+    public function logout(int $fd)
     {
-
+        return RoomOnlineUser::query()->where('fd', '=', $fd)->delete();
     }
 
     /**
@@ -55,6 +58,10 @@ class UserService
      */
     public function getOnlineUsers()
     {
+//        $online_user = [];
+//        foreach (RoomOnlineUser::all() as $item) {
+//
+//        }
         return [];
     }
 }

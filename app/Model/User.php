@@ -16,6 +16,8 @@ use App\Exception\BusinessException;
  */
 class User extends Model
 {
+    const CREATED_AT = 'create_time';
+    const UPDATED_AT = 'update_time';
     /**
      * The table associated with the model.
      *

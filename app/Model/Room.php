@@ -16,6 +16,9 @@ class Room extends Model
 {
     use SoftDeletes;
 
+    const CREATED_AT = 'create_time';
+    const UPDATED_AT = 'update_time';
+
     /**
      * The table associated with the model.
      *

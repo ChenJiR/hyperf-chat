@@ -6,6 +6,7 @@ namespace App\Controller\WsController;
 use App\Service\ChatMessageService;
 use App\Service\ChatRoomsService;
 use App\Service\UserService;
+use App\Util\StringHelper;
 use Hyperf\Di\Annotation\Inject;
 use Swoole\Http\Request;
 use Swoole\Server;
@@ -43,39 +44,40 @@ class ChatController extends WsAbstractController
         switch ($data['type']) {
             case 1://登录
                 $user = $this->userService->login($frame->fd, $data['name'], $data['email'], $data['roomid']);
-                $this->push(
-                    $server, $frame->fd, 1,
-                    $user->username . '加入了群聊',
-                    [
-                        'room_id' => $data['roomid'], 'fd' => $frame->fd,
-                        'name' => $user->username, 'avatar' => '', 'time' => date("H:i", time())
-                    ]
-                );
+                $code = 1;
+                $msg = $user->username . '加入了群聊';
+                $data = [
+                    'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                    'name' => $user->username, 'avatar' => '', 'time' => date("H:i", time())
+                ];
                 break;
             case 2: //新消息
-
-                $this->push(
-                    $server, $frame->fd, 2, '',
-                    [
-                        'room_id' => $data['roomid'], 'fd' => $frame->fd,
-                        'name' => $user->username, 'avatar' => '', 'time' => date("H:i", time())
-                    ]
-                );
+                list($msg, $remains) =
+                    $this->chatMessageService->messageHandler($data['message'], $data['roomid'], $data['c'] == 'img');
+                $code = 1;
+                $msg = '';
+                $data = [
+                    'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                    'name' => $data['name'], 'avatar' => $data['avatar'],
+                    'newmessage' => $msg, 'remains' => $remains,
+                    'time' => date("H:i", time())
+                ];
                 break;
             case 3: // 改变房间
+                $this->chatRoomsService->checkRooms($frame->fd, $data['roomid']);
+                $code = 6;
+                $msg = '换房成功';
                 $data = [
-                    'task' => 'change',
-                    'params' => ['name' => $data['name'], 'avatar' => $data['avatar']],
-                    'fd' => $frame->fd,
-                    'oldroomid' => $data['oldroomid'],
-                    'roomid' => $data['roomid']
+                    'oldroomid' => $data['oldroomid'], 'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                    'mine' => 0, 'name' => $data['name'], 'avatar' => $data['avatar'],
+                    'time' => date("H:i", time())
                 ];
-                $server->task(json_encode($data));
                 break;
             default :
                 $server->push($frame->fd, json_encode(array('code' => 0, 'msg' => 'type error')));
-                break;
+                return;
         }
+        $this->sendMsg($server, $code, $msg, $data, $frame->fd);
     }
 
 
@@ -96,10 +98,14 @@ class ChatController extends WsAbstractController
      */
     public function onOpen($server, Request $request): void
     {
-        $this->push($server, $request, 4, 'success',
+        $rooms = [];
+        foreach ($this->chatRoomsService->getRoomList() as $room) {
+            $rooms[] = ['roomid' => $room->id, 'roomname' => $room->name];
+        }
+        $this->push($server, $request->fd, 4, 'success',
             [
                 'mine' => 0,
-                'rooms' => $this->chatRoomsService->getRoomList(),
+                'rooms' => $rooms,
                 'users' => $this->userService->getOnlineUsers()
             ]
         );

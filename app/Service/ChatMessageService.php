@@ -3,6 +3,7 @@
 
 namespace App\Service;
 
+use App\Util\StringHelper;
 use Hyperf\Di\Annotation\Inject;
 
 /**
@@ -24,6 +25,26 @@ class ChatMessageService
     public function send()
     {
 
+    }
+
+    public function messageHandler($message, $room_id, $isImg = false)
+    {
+        $message = StringHelper::escape(htmlspecialchars($message));
+        $remains = [];
+        if ($isImg) {
+            $message = '<img class="chat-img" onclick="preview(this)" style="display: block; max-width: 120px; max-height: 120px; visibility: visible;" src=' . $message . '>';
+        } else {
+            $emoji = require '../Util/emoji.php';
+            foreach ($emoji as $_k => $_v) {
+                $message = str_replace($_k, $_v, $message);
+            }
+            $tmp = self::remind($room_id, $message);
+            if ($tmp) {
+                $message = $tmp['msg'];
+                $remains = $tmp['remains'];
+            }
+        }
+        return [$message, $remains];
     }
 
     /**

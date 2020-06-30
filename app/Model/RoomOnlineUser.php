@@ -16,6 +16,9 @@ namespace App\Model;
  */
 class RoomOnlineUser extends Model
 {
+    const CREATED_AT = null;
+    const UPDATED_AT = null;
+
     /**
      * The table associated with the model.
      *

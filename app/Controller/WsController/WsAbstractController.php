@@ -42,16 +42,6 @@ abstract class WsAbstractController implements OnMessageInterface, OnCloseInterf
 
     /**
      * @param WebSocketServer $server
-     * @param Request $request
-     */
-    public function onOpen($server, Request $request): void
-    {
-//        $server->task(json_encode(['task' => 'open', 'fd' => $request->fd]));
-        echo "open\n";
-    }
-
-    /**
-     * @param WebSocketServer $server
      * @param $fd
      * @param $code
      * @param $msg
