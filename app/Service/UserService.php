@@ -6,6 +6,7 @@ namespace App\Service;
 use App\Constants\StatusCode;
 use App\Exception\BusinessException;
 use App\Model\User;
+use Hyperf\Di\Annotation\Inject;
 
 /**
  * Class UserService
@@ -13,26 +14,31 @@ use App\Model\User;
  */
 class UserService
 {
+
+    /**
+     * @Inject()
+     * @var ChatRoomsService
+     */
+    private $chatRoomService;
+
     /**
      * 登录
+     * @param $roomid
+     * @param $fd
+     * @param $name
+     * @param $password
+     * @return User
      */
-    public function login($roomid, $fd, $name, $password)
+    public function login($fd, $name, $password, $roomid)
     {
-        if ($name == "") {
-            $name = '游客' . time();
-        }
         if (!$name || !$password) {
             throw new BusinessException(StatusCode::PARAMS_INVALID);
         }
-//        $user = User::query()->where
-
-        $user = new ChatUser(array(
-            'roomid' => $roomid,
-            'fd' => $fd,
-            'name' => htmlspecialchars($name)
-        ));
-        if (!$user->save()) {
-            throw new Exception('This nick is in use.');
+        $user = User::loginOrSignup($name, $password);
+        if ($this->chatRoomService->entryRooms($fd, $user, $roomid)) {
+            return $user;
+        } else {
+            throw new BusinessException(StatusCode::SERVER_ERROR);
         }
     }
 
@@ -49,6 +55,6 @@ class UserService
      */
     public function getOnlineUsers()
     {
-
+        return [];
     }
 }

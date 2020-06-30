@@ -19,13 +19,14 @@ use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Utils\Parallel;
 use Psr\Container\ContainerInterface;
 use Swoole\Http\Request;
 use Swoole\Server;
 use Swoole\Websocket\Frame;
 use Swoole\WebSocket\Server as WebSocketServer;
 
-abstract class WsAbstractController implements OnMessageInterface, OnOpenInterface, OnCloseInterface
+abstract class WsAbstractController implements OnMessageInterface, OnCloseInterface, OnOpenInterface
 {
     /**
      * @Inject
@@ -45,7 +46,42 @@ abstract class WsAbstractController implements OnMessageInterface, OnOpenInterfa
      */
     public function onOpen($server, Request $request): void
     {
-        $server->task(json_encode(['task' => 'open', 'fd' => $request->fd]));
+//        $server->task(json_encode(['task' => 'open', 'fd' => $request->fd]));
         echo "open\n";
+    }
+
+    /**
+     * @param WebSocketServer $server
+     * @param $fd
+     * @param $code
+     * @param $msg
+     * @param $data
+     * @return void
+     */
+    public function push($server, $fd, $code, $msg, $data = []): void
+    {
+        $server->push($fd, json_encode(['code' => $code, 'msg' => $msg, 'data' => $data]));
+    }
+
+    /**
+     * @param WebSocketServer $server
+     * @param $code
+     * @param $msg
+     * @param array $data
+     * @param $my_fd
+     */
+    public function sendMsg($server, $code, $msg, $data, $my_fd)
+    {
+        $co_parallel = new Parallel();
+        $push_data = ['code' => $code, 'msg' => $msg];
+        $data = $data ?: [];
+        foreach ($server->connections as $fd) {
+            $data['mine'] = $fd === $my_fd ? 1 : 0;
+            $push_data['data'] = $data;
+            $co_parallel->add(function () use ($server, $push_data, $fd) {
+                $server->push($fd, json_encode($push_data));
+            });
+        }
+        $co_parallel->wait();
     }
 }

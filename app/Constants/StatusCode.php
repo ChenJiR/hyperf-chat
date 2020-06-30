@@ -27,4 +27,9 @@ class StatusCode extends AbstractConstants
      */
     const PARAMS_INVALID = 1000;
 
+    /**
+     * @Message("密码错误.")
+     */
+    const PASSWORD_ERROR = 1001;
+
 }

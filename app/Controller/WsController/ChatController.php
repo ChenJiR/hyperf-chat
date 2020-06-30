@@ -42,26 +42,25 @@ class ChatController extends WsAbstractController
         $data = json_decode($frame->data, true);
         switch ($data['type']) {
             case 1://登录
-//                $this->userService->login();
-                $data = [
-                    'task' => 'login',
-                    'params' => ['name' => $data['name'], 'email' => $data['email']],
-                    'fd' => $frame->fd,
-                    'roomid' => $data['roomid']
-                ];
-                !$data['params']['name'] || !$data['params']['email'] && $data['task'] = "nologin";
-                $server->task(json_encode($data));
+                $user = $this->userService->login($frame->fd, $data['name'], $data['email'], $data['roomid']);
+                $this->push(
+                    $server, $frame->fd, 1,
+                    $user->username . '加入了群聊',
+                    [
+                        'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                        'name' => $user->username, 'avatar' => '', 'time' => date("H:i", time())
+                    ]
+                );
                 break;
             case 2: //新消息
-                $data = [
-                    'task' => 'new',
-                    'params' => ['name' => $data['name'], 'avatar' => $data['avatar']],
-                    'c' => $data['c'],
-                    'message' => $data['message'],
-                    'fd' => $frame->fd,
-                    'roomid' => $data['roomid']
-                ];
-                $server->task(json_encode($data));
+
+                $this->push(
+                    $server, $frame->fd, 2, '',
+                    [
+                        'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                        'name' => $user->username, 'avatar' => '', 'time' => date("H:i", time())
+                    ]
+                );
                 break;
             case 3: // 改变房间
                 $data = [
@@ -87,24 +86,24 @@ class ChatController extends WsAbstractController
      */
     public function onClose($server, int $fd, int $reactorId): void
     {
-//        $pushMsg = ['code'=>0,'msg'=>'','data'=>[]];
-//        //获取用户信息
-//        $user = Chat::logout("",$fd);
-//        if($user){
-//            $data = array(
-//                'task' => 'logout',
-//                'params' => array(
-//                    'name' => $user['name']
-//                ),
-//                'fd' => $fd
-//            );
-//            $this->serv->task( json_encode($data) );
-//        }
-
         echo "client {$fd} closed\n";
     }
 
-
+    /**
+     * @param WebSocketServer $server
+     * @param Request $request
+     * @return array|void
+     */
+    public function onOpen($server, Request $request): void
+    {
+        $this->push($server, $request, 4, 'success',
+            [
+                'mine' => 0,
+                'rooms' => $this->chatRoomsService->getRoomList(),
+                'users' => $this->userService->getOnlineUsers()
+            ]
+        );
+    }
 
 
 }

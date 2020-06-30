@@ -4,6 +4,8 @@ declare (strict_types=1);
 
 namespace App\Model;
 
+use Hyperf\Database\Model\SoftDeletes;
+
 /**
  * @property int $id
  * @property string $name
@@ -12,6 +14,8 @@ namespace App\Model;
  */
 class Room extends Model
 {
+    use SoftDeletes;
+
     /**
      * The table associated with the model.
      *
