@@ -47,19 +47,19 @@ class ChatController extends WsAbstractController
                 $code = 1;
                 $msg = $user->username . '加入了群聊';
                 $data = [
-                    'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                    'roomid' => $data['roomid'], 'fd' => $frame->fd,
                     'name' => $user->username, 'avatar' => '', 'time' => date("H:i", time())
                 ];
                 break;
             case 2: //新消息
-                list($msg, $remains) =
+                list($newmessage, $remains) =
                     $this->chatMessageService->messageHandler($data['message'], $data['roomid'], $data['c'] == 'img');
-                $code = 1;
+                $code = 2;
                 $msg = '';
                 $data = [
-                    'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                    'roomid' => $data['roomid'], 'fd' => $frame->fd,
                     'name' => $data['name'], 'avatar' => $data['avatar'],
-                    'newmessage' => $msg, 'remains' => $remains,
+                    'newmessage' => $newmessage, 'remains' => $remains,
                     'time' => date("H:i", time())
                 ];
                 break;
@@ -68,7 +68,7 @@ class ChatController extends WsAbstractController
                 $code = 6;
                 $msg = '换房成功';
                 $data = [
-                    'oldroomid' => $data['oldroomid'], 'room_id' => $data['roomid'], 'fd' => $frame->fd,
+                    'oldroomid' => $data['oldroomid'], 'roomid' => $data['roomid'], 'fd' => $frame->fd,
                     'mine' => 0, 'name' => $data['name'], 'avatar' => $data['avatar'],
                     'time' => date("H:i", time())
                 ];
@@ -88,7 +88,11 @@ class ChatController extends WsAbstractController
      */
     public function onClose($server, int $fd, int $reactorId): void
     {
-        echo "client {$fd} closed\n";
+        $user = $this->chatRoomsService->getUserByFd($fd);
+        $this->userService->logout($fd);
+        $this->sendMsg($server, 3, $user->username . '退出了群聊', [
+            'fd' => $fd, 'name' => $user->username
+        ], $fd);
     }
 
     /**

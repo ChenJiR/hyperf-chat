@@ -15,11 +15,10 @@ var chat = {
 		email       : "",
 		avatar      : "",
 		rds         : [],//所有房间ID
-		crd         : 'a', //当前房间ID
+		crd         : '1', //当前房间ID
 		remains     : []
 	},
 	init : function (){
-		this.copyright();
 		this.off();
 		chat.data.storage = window.localStorage;
 		this.ws();
@@ -44,7 +43,7 @@ var chat = {
 		chat.data.type = 1; //登录标志
 		chat.data.email = email; //邮箱
 		chat.data.login = true;
-		var json = {"type": chat.data.type,"name": name,"email": email,'roomid':'a'};
+		var json = {"type": chat.data.type,"name": name,"email": email,'roomid':chat.data.crd};
 		chat.wsSend(JSON.stringify(json));
 		return false;
 		 
@@ -255,6 +254,7 @@ var chat = {
 					display = 'none';
 				}
 			}
+			console.log(this.data.crd);
 			$('.main-menus').html(rooms.join(''));
 			$("#user-lists").html(userlists.join(''));
 			$("#chat-lists").html(chatlists.join(''));
@@ -375,9 +375,6 @@ var chat = {
 				return false;
 			} 
 		}
-	},
-	copyright:function(){
-		console.log("您好！不介意的话可以加QQ讨论学习（1335244575）");
 	},
 	print:function(flag,obj){
 		console.log('----' + flag + ' start-------');

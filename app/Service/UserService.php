@@ -58,10 +58,20 @@ class UserService
      */
     public function getOnlineUsers()
     {
-//        $online_user = [];
-//        foreach (RoomOnlineUser::all() as $item) {
-//
-//        }
-        return [];
+        $online_user = [];
+        foreach (RoomOnlineUser::query()->with('user')->get() as $item) {
+            /** @var RoomOnlineUser $item $item */
+            $user = [
+                'avatar' => '',
+                'fd' => $item->fd,
+                'name' => $item->user->username,
+                'roomid' => $item->room_id,
+                'time' => date("H:i", strtotime($item->entry_time))
+            ];
+
+            isset($online_user[$item->room->id])
+                ? $online_user[$item->room->id][] = $user : $online_user[$item->room->id] = [$user];
+        }
+        return $online_user;
     }
 }

@@ -38,13 +38,13 @@ class RoomOnlineUser extends Model
      */
     protected $casts = ['id' => 'integer', 'user_id' => 'integer', 'room_id' => 'integer', 'fd' => 'integer'];
 
-    public function getUser()
+    public function user()
     {
-        return $this->hasOne(User::class, 'user_id', 'id');
+        return $this->hasOne(User::class,'id', 'user_id');
     }
 
-    public function getRoom()
+    public function room()
     {
-        return $this->hasOne(Room::class, 'room_id', 'id');
+        return $this->hasOne(Room::class, 'id','room_id');
     }
 }

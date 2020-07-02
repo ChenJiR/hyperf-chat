@@ -34,7 +34,8 @@ class ChatMessageService
         if ($isImg) {
             $message = '<img class="chat-img" onclick="preview(this)" style="display: block; max-width: 120px; max-height: 120px; visibility: visible;" src=' . $message . '>';
         } else {
-            $emoji = require '../Util/emoji.php';
+//            $emoji = require '../Util/emoji.php';
+            $emoji = [];
             foreach ($emoji as $_k => $_v) {
                 $message = str_replace($_k, $_v, $message);
             }

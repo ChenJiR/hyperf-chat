@@ -62,4 +62,11 @@ class ChatRoomsService
     {
         return RoomOnlineUser::query()->where(['room_id' => $room_id])->with('user')->get();
     }
+
+    public function getUserByFd($fd)
+    {
+        /** @var RoomOnlineUser $room_user */
+        $room_user = RoomOnlineUser::query()->where(['fd' => $fd])->first();
+        return $room_user ? $room_user->user : null;
+    }
 }
